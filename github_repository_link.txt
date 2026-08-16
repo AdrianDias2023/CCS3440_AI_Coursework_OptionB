@@ -1,0 +1,23 @@
+# ==============================================================================
+# CCS3440 – Artificial Intelligence Coursework (Option B)
+# GitHub Repository Link & Submission Structure
+# Student ID: 23UG1-0018, 23UG1-0151, 23UG1-0072, 23UG1-0069, CIT-23-02-0091
+# ==============================================================================
+
+GitHub Repository Link:
+https://github.com/AdrianDias2023/CCS3440_AI_Coursework_OptionB
+
+--------------------------------------------------------------------------------
+Repository Folder Structure & Contents:
+--------------------------------------------------------------------------------
+├── Assignment_02_Coursework_OptionB.pdf      # Full Technical Report (PDF)
+├── Assignment_02_Coursework_OptionB.ipynb  # Step-by-step model development Jupyter Notebook
+├── Assignment_02_Coursework_OptionB.py     # Standalone model training & evaluation pipeline
+├── best_readmission_rf_model.joblib     # Saved production Random Forest classifier
+├── readmission_preprocessor.joblib      # Saved preprocessor pipeline (scaling & encoding)
+├── app.py                               # Prototype Streamlit web application
+└── README.md                            # Execution guide & environment setup instructions
+
+--------------------------------------------------------------------------------
+Submission Note:
+Create a public repository named 'CCS3440_AI_Coursework_OptionB' under your GitHub account 'AdrianDias2023' and upload all the files in this folder to it.
