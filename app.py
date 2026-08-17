@@ -8,6 +8,7 @@ st.set_page_config(page_title="SmartCare AI Predictor", page_icon="🏥", layout
 
 st.title("🏥 SmartCare Readmission Risk Calculator")
 st.write("Clinical Decision Support Dashboard - Artificial Intelligence Coursework (Option B)")
+st.info("Educational coursework prototype only. This tool is not clinically validated and must not replace professional medical judgement.")
 
 # Sidebar: Model metadata information
 st.sidebar.title("Model Information")
@@ -25,13 +26,13 @@ st.sidebar.markdown("""
 * SelectPercentile (ANOVA F-test, Top 80%)
 
 **Evaluation Method:**
-* Stratified 5-Fold Nested CV & Holdout Test Set ($N=66$)
+* Stratified 5-Fold CV + Nested GridSearchCV for Random Forest
 
 **XAI & Fairness:**
 * Permutation Importance, SHAP, Subgroup Metrics
 
 **Environment Dependency:**
-* `scikit-learn == 1.5.0`
+* `scikit-learn == 1.8.0`
 
 ---
 **Group Members:**
@@ -51,13 +52,13 @@ try:
     pipeline = load_model_pipeline()
     model_ok = True
 except FileNotFoundError:
-    st.error("⚠️ Model pipeline file 'best_readmission_rf_model.joblib' was not found. Please train and save the model in the notebook first.")
+    st.error(" Model pipeline file 'best_readmission_rf_model.joblib' was not found. Please train and save the model in the notebook first.")
     model_ok = False
 except AttributeError as e:
-    st.error(f"⚠️ Model Deserialization Error: {str(e)}\n\nThis model was serialized using **scikit-learn 1.5.0**. Running on a different scikit-learn version can cause deserialization failures due to internal namespace changes. Please install the exact version using: `pip install scikit-learn==1.5.0`")
+    st.error(f" Model Deserialization Error: {str(e)}\n\nThis model file must be opened with the same scikit-learn version used during training. Please install the project dependencies using: `pip install -r requirements.txt`")
     model_ok = False
 except Exception as e:
-    st.error(f"⚠️ Unexpected Error loading model: {str(e)}")
+    st.error(f" Unexpected Error loading model: {str(e)}")
     model_ok = False
 
 if model_ok:
@@ -115,9 +116,9 @@ if model_ok:
     
     # 1. Admitted = No checks
     if admitted == 0:
-        st.info("ℹ️ Note: This predictive model is trained on discharged hospital inpatients. Outpatients (Admitted=No) do not have hospital admissions and have 0.00% inpatient readmission risk.")
+        st.info("ℹ Note: This predictive model is trained on discharged hospital inpatients. Outpatients (Admitted=No) do not have hospital admissions and have 0.00% inpatient readmission risk.")
         if length_of_stay > 0 or room_type != "None" or room_charge > 0:
-            st.warning("⚠️ Operational Constraint: Outpatients (Admitted=No) cannot have a hospital stay length > 0, room charges, or room assignments. Overriding these inputs to 0 / 'None'.")
+            st.warning(" Operational Constraint: Outpatients (Admitted=No) cannot have a hospital stay length > 0, room charges, or room assignments. Overriding these inputs to 0 / 'None'.")
             length_of_stay = 0
             room_type = "None"
             room_charge = 0
@@ -126,7 +127,7 @@ if model_ok:
             
     # 2. Missed appointments count check
     if missed_appointments > previous_appointments:
-        st.error("❌ Input Error: Missed appointments cannot exceed the total previous appointments count.")
+        st.error(" Input Error: Missed appointments cannot exceed the total previous appointments count.")
         validation_ok = False
 
 
@@ -155,14 +156,16 @@ if model_ok:
     
     patient_df = pd.DataFrame(patient_dict)
     
+    st.caption("Risk bands (Low / Medium / High) are demonstration thresholds for this coursework prototype and are not clinically validated.")
+
     st.markdown("### Prediction Evaluation")
-    if st.button("📊 Evaluate Patient Risk"):
+    if st.button(" Evaluate Patient Risk"):
         if validation_ok:
             if admitted == 0:
                 risk_prob = 0.0
                 risk_category = "Low"
                 alert_func = st.success
-                alert_msg = "✅ **Outpatient Status:** Outpatients have zero hospital stay duration and zero 30-day inpatient readmission risk."
+                alert_msg = " **Outpatient Status:** Outpatients have zero hospital stay duration and zero 30-day inpatient readmission risk."
             else:
                 risk_prob = pipeline.predict_proba(patient_df)[0][1]
                 
@@ -170,15 +173,15 @@ if model_ok:
                 if risk_prob < 0.30:
                     risk_category = "Low"
                     alert_func = st.success
-                    alert_msg = "✅ **Low Risk:** The patient has a low probability of readmission. Standard discharge protocol is sufficient."
+                    alert_msg = " **Low Risk:** The patient has a low probability of readmission. Standard discharge protocol is sufficient."
                 elif risk_prob <= 0.70:
                     risk_category = "Medium"
                     alert_func = st.warning
-                    alert_msg = "⚠️ **Medium Risk Warning:** The patient shows moderate readmission indicators. Recommend arranging a standard follow-up appointment within 7 days and verifying outpatient compliance barriers."
+                    alert_msg = " **Medium Risk Warning:** The patient shows moderate readmission indicators. Recommend arranging a standard follow-up appointment within 7 days and verifying outpatient compliance barriers."
                 else:
                     risk_category = "High"
                     alert_func = st.error
-                    alert_msg = "🚨 **High Risk Clinical Alert:** The patient is highly likely to be readmitted within 30 days. It is strongly recommended to review the discharge checklist, reconcile medications, and schedule a 48-hour post-discharge follow-up."
+                    alert_msg = " **High Risk Clinical Alert:** The patient is highly likely to be readmitted within 30 days. It is strongly recommended to review the discharge checklist, reconcile medications, and schedule a 48-hour post-discharge follow-up."
             
             col_m1, col_m2 = st.columns(2)
             with col_m1:
